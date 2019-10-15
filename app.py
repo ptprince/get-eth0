@@ -42,9 +42,10 @@ def get_list():
     for row in rows:
         one = {}
         one.update({
-            'id': row[0],
-            'hostname': row[1],
-            'ip': row[2],
+            # 'id': row[0],
+            'hostname': row[0],
+            'ip': row[1],
+            'des': row[2],
             'update_time': row[3]
         })
         servers.append(one)

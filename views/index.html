@@ -10,14 +10,13 @@
 	<table>
 		<caption>結果出力のページ</caption>
 		<tr>
-			<th>ID</th>
+			
       <th>Hostname</th>
 			<th>Ip</th>
 			<th>Update</th>
 		</tr>
     %for server in servers:
     <tr>
-			<td>{{server.get('id')}}</td>
 			<td>{{server.get('hostname')}}</td>
       <td>{{server.get('ip')}}</td>
 			<td>{{server.get('update_time')}}</td>
