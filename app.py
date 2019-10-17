@@ -63,7 +63,7 @@ def save_ip():
                           host=db_info.get('HOST'),
                           db=db_info.get('NAME'))
     cur = con.cursor()
-    sql = "insert into server (hostname, ip_address, updated_time) values ('{0}', '{1}', '{2}')  on duplicate key update hostname='{0}', ip_address='{1}';".format(data["hostname"], data["eth0_ip"], (datetime.now() + timedelta(hours=9)).strftime('%Y-%m-%d %H:%M:%S'))
+    sql = "insert into server (hostname, ip_address, updated_time) values ('{0}', '{1}', '{2}')  on duplicate key update hostname='{0}', ip_address='{1}', updated_time='{2}';".format(data["hostname"], data["eth0_ip"], (datetime.now() + timedelta(hours=9)).strftime('%Y-%m-%d %H:%M:%S'))
     print(sql)
     cur.execute(sql)
     con.commit()
