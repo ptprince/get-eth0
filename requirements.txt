@@ -1,4 +1,4 @@
-bottle==0.12.17
+bottle==0.12.19
 PyMySQL==0.9.3
 python-dotenv==0.10.3
 gunicorn==19.9.0
