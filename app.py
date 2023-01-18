@@ -1,26 +1,22 @@
 import os
 import sys
 from urllib import parse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import dotenv
 import pymysql.cursors
+import pg8000.dbapi
 from bottle import default_app, route, run, template,request, abort, HTTPResponse
+from utils.connector import dbConnector
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 
 dotenv.load_dotenv(dotenv_path)
-os.environ.get('')
 
-JAWSDB_URL = os.environ.get('JAWSDB_URL')
-url = parse.urlparse(JAWSDB_URL)
-db_info = {
-	'NAME': url.path[1:],
-	'USER': url.username,
-	'PASSWORD': url.password,
-	'HOST': url.hostname,
-	'PORT': url.port if url.port else 3306,
-}
+JST = timezone(timedelta(hours=+9), 'JST')
+
+DB_URL = os.environ.get('DB_URL')
+
 
 @route("/")
 def hello_world():
@@ -28,28 +24,22 @@ def hello_world():
 
 @route("/server", method=['GET'])
 def get_list():
-    con = pymysql.connect(user=db_info.get('USER'),
-                          passwd=db_info.get('PASSWORD'),
-                          host=db_info.get('HOST'),
-                          db=db_info.get('NAME'))
-    cur = con.cursor()
-    sql = "select * from server"
-    cur.execute(sql)
-    rows = cur.fetchall()
-    cur.close
-    con.close
-    servers = []
+  con = dbConnector(DB_URL)
+  sql = "select * from server"
+  rows = con.fetch(sql)
+  servers = []
+  if  len(rows)> 0:
     for row in rows:
         one = {}
         one.update({
-            # 'id': row[0],
-            'hostname': row[0],
-            'ip': row[1],
-            'des': row[2],
-            'update_time': row[3]
+            'id': row[0],
+            'hostname': row[1],
+            'ip': row[2],
+            'des': row[3],
+            'update_time': row[4]
         })
         servers.append(one)
-    return template('./views/index.html', servers=servers)  # ここで返す内容は何でもよい
+  return template('./views/index.html', servers=servers)  # ここで返す内容は何でもよい
 
 @route("/server", method=['POST'])
 def save_ip():
@@ -58,17 +48,14 @@ def save_ip():
     return abort(code=400, text="Bad content type")
   data = request.json
   if ("hostname" in data.keys()) and ("eth0_ip" in data.keys()):
-    con = pymysql.connect(user=db_info.get('USER'),
-                          passwd=db_info.get('PASSWORD'),
-                          host=db_info.get('HOST'),
-                          db=db_info.get('NAME'))
-    cur = con.cursor()
-    sql = "insert into server (hostname, ip_address, updated_time) values ('{0}', '{1}', '{2}')  on duplicate key update hostname='{0}', ip_address='{1}', updated_time='{2}';".format(data["hostname"], data["eth0_ip"], (datetime.now() + timedelta(hours=9)).strftime('%Y-%m-%d %H:%M:%S'))
+    con = dbConnector(DB_URL)
+    if con.db_info.scheme == 'postgres':
+      sql = "insert into server (hostname, ip_address, updated_time) values ('{0}', '{1}', '{2}')  ON CONFLICT (hostname) DO UPDATE SET hostname='{0}', ip_address='{1}', updated_time='{2}';".format(data["hostname"], data["eth0_ip"], (datetime.now(JST)).strftime('%Y-%m-%d %H:%M:%S'))
+    else:
+      sql = "insert into server (hostname, ip_address, updated_time) values ('{0}', '{1}', '{2}')  on duplicate key update hostname='{0}', ip_address='{1}', updated_time='{2}';".format(data["hostname"], data["eth0_ip"], (datetime.now(JST)).strftime('%Y-%m-%d %H:%M:%S'))
     print(sql)
-    cur.execute(sql)
+    con.cur.execute(sql)
     con.commit()
-    cur.close
-    con.close
     return HTTPResponse(status=200, body="OK")
   else:
     return abort(code=400, text="Bad data")
