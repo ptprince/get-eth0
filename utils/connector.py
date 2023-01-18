@@ -1,14 +1,12 @@
 import logging
-import sys
-
 import os
+import ssl
 import sys
-from urllib.parse import urlparse
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
+
 import pg8000.dbapi
 import pymysql.cursors
-
-
 
 logger = logging.getLogger()
 for h in logger.handlers:
@@ -22,6 +20,9 @@ logger.addHandler(h)
 
 logger.setLevel(logging.INFO)
 
+sslContext = ssl.create_default_context()
+sslContext.check_hostname = False
+sslContext.verify_mode = ssl.CERT_NONE
 
 class dbConnector:
     def __init__(self, db_url: str) -> None:
@@ -36,7 +37,8 @@ class dbConnector:
                     user=self.db_info.username,
                     password=self.db_info.password,
                     database=self.db_info.path[1:],
-                    ssl_context=True)
+                    ssl_context=sslContext
+                    )
             else:
                 self.sql_conn = pymysql.connect(
                     init_command='SET SESSION time_zone="+09:00"',

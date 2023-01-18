@@ -1,12 +1,14 @@
 import os
+import ssl
 import sys
-from urllib import parse
 from datetime import datetime, timedelta
+from urllib import parse
 
 import dotenv
-import pymysql.cursors
 import pg8000.dbapi
-from bottle import default_app, route, run, template,request, abort, HTTPResponse
+import pymysql.cursors
+from bottle import (HTTPResponse, abort, default_app, request, route, run,
+                    template)
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 
