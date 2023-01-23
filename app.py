@@ -1,17 +1,33 @@
+import logging
 import os
 import sys
-from urllib import parse
 from datetime import datetime, timedelta, timezone
+from urllib import parse
 
 import dotenv
-import pymysql.cursors
 import pg8000.dbapi
-from bottle import default_app, route, run, template,request, abort, HTTPResponse
+import pymysql.cursors
+from bottle import (HTTPResponse, abort, default_app, request, route, run,
+                    template)
+
 from utils.connector import dbConnector
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 
 dotenv.load_dotenv(dotenv_path)
+
+
+logger = logging.getLogger()
+for h in logger.handlers:
+    logger.removeHandler(h)
+
+h = logging.StreamHandler(sys.stdout)
+
+FORMAT = '%(levelname)s %(asctime)s [%(filename)s:%(lineno)d] [%(funcName)s] %(message)s'
+h.setFormatter(logging.Formatter(FORMAT))
+logger.addHandler(h)
+
+logger.setLevel(os.environ.get('LOG_LEVEL')if os.environ.get('LOG_LEVEL') else logging.INFO)
 
 JST = timezone(timedelta(hours=+9), 'JST')
 
@@ -29,14 +45,15 @@ def get_list():
   rows = con.fetch(sql)
   servers = []
   if  rows != None and len(rows)> 0:
+    logger.info(rows)
     for row in rows:
         one = {}
         one.update({
-            'id': row[0],
-            'hostname': row[1],
-            'ip': row[2],
-            'des': row[3],
-            'update_time': row[4]
+            'id': row.get('id'),
+            'hostname': row.get('hostname'),
+            'ip': row.get('ip_address'),
+            'des': row.get('description'),
+            'update_time': row.get('updated_time')
         })
         servers.append(one)
   return template('./views/index.html', servers=servers)  # ここで返す内容は何でもよい
