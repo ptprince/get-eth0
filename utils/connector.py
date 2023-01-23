@@ -43,11 +43,11 @@ class dbConnector:
                 self.sql_conn = pymysql.connect(
                     init_command='SET SESSION time_zone="+09:00"',
                     host=self.db_info.hostname,
-                    port=self.db_info.port if 'port' in self.db_info else '3306',
+                    port=self.db_info.port if 'port' in self.db_info else 3306,
                     user=self.db_info.username,
                     passwd=self.db_info.password,
                     database=self.db_info.path[1:],
-                    connect_timeout=10,  # 変更可
+                    connect_timeout=30,  # 変更可
                     cursorclass=pymysql.cursors.DictCursor  # sqlのレスポンスがdictがいいなら指定
                 )
 

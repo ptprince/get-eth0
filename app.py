@@ -28,7 +28,7 @@ def get_list():
   sql = "select * from server"
   rows = con.fetch(sql)
   servers = []
-  if  len(rows)> 0:
+  if  rows != None and len(rows)> 0:
     for row in rows:
         one = {}
         one.update({
