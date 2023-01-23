@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from urllib import parse
 
 import dotenv
-import pg8000.dbapi
+import psycopg2
 import pymysql.cursors
 from bottle import (HTTPResponse, abort, default_app, request, route, run,
                     template)

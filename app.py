@@ -5,8 +5,7 @@ from datetime import datetime, timedelta, timezone
 from urllib import parse
 
 import dotenv
-import pg8000.dbapi
-import pymysql.cursors
+
 from bottle import (HTTPResponse, abort, default_app, request, route, run,
                     template)
 
